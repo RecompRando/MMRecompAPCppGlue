@@ -12,6 +12,8 @@
 
 #define TO_PTR(type, var) ((type*)(&rdram[(uint64_t)var - 0xFFFFFFFF80000000]))
 
+int64_t last_sent_location;
+
 template<int index, typename T>
 T _arg(uint8_t* rdram, recomp_context* ctx) {
     static_assert(index < 4, "Only args 0 through 3 supported");
@@ -231,6 +233,28 @@ extern "C"
         _return(ctx, (int) AP_GetLocationItemType(location));
     }
     
+    DLLEXPORT void rando_get_unconverted_item_id(uint8_t* rdram, recomp_context* ctx)
+    {
+        u32 arg = _arg<0, u32>(rdram, ctx);
+        
+        if (arg == 0)
+        {
+            _return(ctx, 0);
+            return;
+        }
+        
+        int64_t location = 0x3469420000000 | arg;
+        
+        if (AP_GetLocationHasLocalItem(location))
+        {
+            int64_t item = AP_GetItemAtLocation(location) & 0xFFFFFF;
+            _return(ctx, (u32) item);
+            return;
+        }
+
+        _return(ctx, 0);
+    }
+
     DLLEXPORT void rando_get_item_id(uint8_t* rdram, recomp_context* ctx)
     {
         u32 arg = _arg<0, u32>(rdram, ctx);
@@ -394,6 +418,7 @@ extern "C"
         if (!AP_GetLocationIsChecked(location_id))
         {
             AP_SendItem(location_id);
+            last_sent_location = location_id;
         }
     }
     
@@ -402,6 +427,11 @@ extern "C"
         u32 arg = _arg<0, u32>(rdram, ctx);
         int64_t location_id = ((int64_t) (((int64_t) 0x3469420000000) | ((int64_t) arg)));
         _return(ctx, AP_GetLocationIsChecked(location_id));
+    }
+    
+    DLLEXPORT void rando_get_last_location(uint8_t* rdram, recomp_context* ctx)
+    {
+        _return(ctx, ((u32) last_sent_location));
     }
     
     DLLEXPORT void rando_complete_goal(uint8_t* rdram, recomp_context* ctx)
