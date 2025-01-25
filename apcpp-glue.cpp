@@ -169,6 +169,35 @@ extern "C"
         _return(ctx, AP_GetSlotDataInt("skullsanity") != 2);
     }
     
+    
+    DLLEXPORT void rando_damage_multiplier(uint8_t* rdram, recomp_context* ctx)
+    {
+        switch (AP_GetSlotDataInt("damage_multiplier"))
+        {
+            case 0:
+                _return(ctx, (u32) 0);
+                return;
+            case 1:
+                _return(ctx, (u32) 1);
+                return;
+            case 2:
+                _return(ctx, (u32) 2);
+                return;
+            case 3:
+                _return(ctx, (u32) 4);
+                return;
+            case 4:
+                _return(ctx, (u32) 0xF);
+                return;
+        }
+        return;
+    }
+    
+    DLLEXPORT void rando_death_behavior(uint8_t* rdram, recomp_context* ctx)
+    {
+        _return(ctx, (u32) AP_GetSlotDataInt("death_behavior"));
+    }
+
     DLLEXPORT void rando_get_death_link_pending(uint8_t* rdram, recomp_context* ctx)
     {
         _return(ctx, AP_DeathLinkPending());
