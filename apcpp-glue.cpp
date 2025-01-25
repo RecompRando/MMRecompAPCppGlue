@@ -281,7 +281,24 @@ extern "C"
             switch (item & 0xFF0000)
             {
                 case 0x010000:
-                    _return(ctx, (u32) GI_B2);
+                    switch (item & 0xFF)
+                    {
+                        case 0x7F:
+                            _return(ctx, (u32) GI_B2);
+                            return;
+                        case 0x00:
+                            _return(ctx, (u32) GI_46);
+                            return;
+                        case 0x01:
+                            _return(ctx, (u32) GI_47);
+                            return;
+                        case 0x02:
+                            _return(ctx, (u32) GI_48);
+                            return;
+                        case 0x03:
+                            _return(ctx, (u32) GI_49);
+                            return;
+                    }
                     return;
                 case 0x020000:
                     switch (item & 0xFF)
