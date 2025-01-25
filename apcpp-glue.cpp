@@ -302,9 +302,9 @@ extern "C"
         _return(ctx, AP_GetSlotDataInt("permanent_chateau_romani") == 1);
     }
     
-    DLLEXPORT void rando_get_reset_with_inverted_time_enabled(uint8_t* rdram, recomp_context* ctx)
+    DLLEXPORT void rando_get_start_with_inverted_time_enabled(uint8_t* rdram, recomp_context* ctx)
     {
-        _return(ctx, AP_GetSlotDataInt("reset_with_inverted_time") == 1);
+        _return(ctx, AP_GetSlotDataInt("start_with_inverted_time") == 1);
     }
     
     DLLEXPORT void rando_get_receive_filled_wallets_enabled(uint8_t* rdram, recomp_context* ctx)
