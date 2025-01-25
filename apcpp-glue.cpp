@@ -138,6 +138,11 @@ int64_t fixLocation(u32 arg)
         }
         return 0x090000 | shopItem;
     }
+
+    if (arg == 0x05481E) {
+        return 0x054D1E;
+    }
+    
     return arg;
 }
 
