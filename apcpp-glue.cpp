@@ -259,6 +259,10 @@ extern "C"
                             int64_t location_id = 0x3469420090000 | i;
                             AP_RemoveQueuedLocationScout(location_id);
                         }
+
+                        AP_RemoveQueuedLocationScout(0x3469420026392);
+                        AP_RemoveQueuedLocationScout(0x3469420090000 | GI_CHATEAU);
+                        AP_RemoveQueuedLocationScout(0x3469420006792);
                     }
                 }
                 
