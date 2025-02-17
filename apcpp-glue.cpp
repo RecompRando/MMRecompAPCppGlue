@@ -145,6 +145,16 @@ int64_t fixLocation(u32 arg)
     return arg;
 }
 
+int64_t last_location_sent;
+
+void syncLocation(int64_t location_id)
+{
+    if (location_id == last_location_sent)
+    {
+        while (!AP_GetLocationIsChecked(location_id));
+    }
+}
+
 extern "C"
 {
     DLLEXPORT u32 recomp_api_version = 1;
@@ -560,6 +570,7 @@ extern "C"
     {
         u32 arg = _arg<0, u32>(rdram, ctx);
         int64_t location_id = ((int64_t) (((int64_t) 0x3469420000000) | ((int64_t) fixLocation(arg))));
+        syncLocation(location_id);
         _return(ctx, hasItem(location_id));
     }
     
@@ -570,7 +581,7 @@ extern "C"
         if (AP_LocationExists(location_id) && !AP_GetLocationIsChecked(location_id))
         {
             AP_SendItem(location_id);
-            while (!AP_GetLocationIsChecked(location_id));
+            last_location_sent = location_id;
         }
     }
     
@@ -578,6 +589,7 @@ extern "C"
     {
         u32 arg = _arg<0, u32>(rdram, ctx);
         int64_t location_id = ((int64_t) (((int64_t) 0x3469420000000) | ((int64_t) fixLocation(arg))));
+        syncLocation(location_id);
         _return(ctx, AP_GetLocationIsChecked(location_id));
     }
     
