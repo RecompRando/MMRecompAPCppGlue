@@ -70,6 +70,14 @@ void glueGetLine(std::ifstream& in, std::string& outString)
         outString += c;
         c = in.get();
     }
+
+    c = in.peek();
+
+    while (c == '\r' || c == '\n')
+    {
+        in.get();
+        c = in.peek();
+    }
 }
 
 u32 hasItem(u64 itemId)
