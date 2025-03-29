@@ -1,10 +1,10 @@
 #include <string>
 
 
-class RandoConfig {
+class SinglePlayerRandoConfig {
 public:
-    RandoConfig();
-    ~RandoConfig();
+    SinglePlayerRandoConfig();
+    ~SinglePlayerRandoConfig();
 
     enum class Accessability {
         FULL,
@@ -24,6 +24,11 @@ public:
     bool startShieldless = false;
     bool startWithSoaring = true;
 
+    bool startingHeartsAreRandom = false;
+    int startingHeartsMin = 4;
+    int startingHeartsMax = 12;
+    int startingHearts = 12;
+    
     enum class StartingHeartsAreContainersOrPieces {
         CONTAINERS,
         PIECES
@@ -83,5 +88,4 @@ public:
         MOON_CRASH
     };
     DeathBehavior deathBehavior = DeathBehavior::VANILLA;
-
 };
