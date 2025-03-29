@@ -8,7 +8,13 @@ set(CMAKE_SKIP_BUILD_RPATH FALSE)
 set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 set(CMAKE_INSTALL_RPATH "$\{ORIGIN\}")
 
-add_library(APCpp-Glue SHARED apcpp-singleplayer-config.cpp apcpp-singleplayer-config.h apcpp-glue.cpp apcpp-glue.h Archipelago.h)
+add_library(APCpp-Glue SHARED 
+    apcpp-singleplayer-config.cpp
+    apcpp-singleplayer-config.h
+    apcpp-glue.cpp
+    apcpp-glue.h
+    Archipelago.h
+)
 
 target_include_directories(${PROJECT_NAME} PRIVATE lib/APCpp)
 
