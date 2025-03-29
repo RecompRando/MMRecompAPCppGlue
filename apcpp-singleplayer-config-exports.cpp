@@ -4,18 +4,18 @@
 
 std::shared_ptr<SinglePlayerRandoConfig> sp_config = NULL;
 
-RECOMP_DLL_FUNC(sp_create_config) {
+RECOMP_DLL_FUNC(rando_sp_create_config) {
     sp_config = std::make_shared<SinglePlayerRandoConfig>();
 }
 
 // An easy get/set macro:
 #define SP_GET_32(_name) \
-    RECOMP_DLL_FUNC(sp_get_##_name) { \
+    RECOMP_DLL_FUNC(rando_sp_get_##_name) { \
         RECOMP_RETURN(s32, sp_config->_name); \
     } 
 
 #define SP_SET_32(_type, _name) \
-    RECOMP_DLL_FUNC(sp_set_##_name) { \
+    RECOMP_DLL_FUNC(rando_sp_set_##_name) { \
        sp_config->_name = RECOMP_ARG(_type, 1); \
     } 
 
@@ -25,12 +25,12 @@ RECOMP_DLL_FUNC(sp_create_config) {
 
 // Get/Set for enums
 #define SP_GET_ENUM(_name) \
-    RECOMP_DLL_FUNC(sp_get_##_name) { \
+    RECOMP_DLL_FUNC(rando_sp_get_##_name) { \
         RECOMP_RETURN(s32, (s32)sp_config->_name); \
     } 
 
 #define SP_SET_ENUM(_type, _name) \
-    RECOMP_DLL_FUNC(sp_set_##_name) { \
+    RECOMP_DLL_FUNC(rando_sp_set_##_name) { \
        sp_config->_name = (_type) RECOMP_ARG(s32, 1); \
     } 
 
