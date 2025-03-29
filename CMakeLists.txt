@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 project(APCpp-Glue)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_SKIP_BUILD_RPATH FALSE)
@@ -9,6 +9,7 @@ set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 set(CMAKE_INSTALL_RPATH "$\{ORIGIN\}")
 
 add_library(APCpp-Glue SHARED 
+    apcpp-singleplayer-config-exports.cpp
     apcpp-singleplayer-config.cpp
     apcpp-singleplayer-config.h
     apcpp-glue.cpp
