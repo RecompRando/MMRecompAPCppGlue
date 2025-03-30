@@ -75,7 +75,7 @@ public:
     bool cowSanity = false;
     bool shuffleCreatFairyRewards = false;
     bool fairySanity = false;
-    bool start_with_consumables = false;
+    bool startWithConsumables = false;
     bool permanentChateauRomani = true;
     bool startWithInvertedTime = true;
     bool recieveFilledWallets = true;

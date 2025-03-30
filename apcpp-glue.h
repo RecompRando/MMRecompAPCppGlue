@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-#if defined(_WIN32)
+#if defined(_MSC_VER)
     //  Microsoft
     #define DLLEXPORT __declspec(dllexport)
     #define DLLIMPORT __declspec(dllimport)
