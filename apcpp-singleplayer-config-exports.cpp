@@ -10,12 +10,12 @@ RECOMP_DLL_FUNC(rando_sp_create_config) {
 
 // An easy get/set macro:
 #define SP_GET_32(_name) \
-    RECOMP_DLL_FUNC(rando_sp_get_##_name) { \
+    RECOMP_DLL_C_FUNC(rando_sp_get_##_name) { \
         RECOMP_RETURN(s32, sp_config->_name); \
     } 
 
 #define SP_SET_32(_type, _name) \
-    RECOMP_DLL_FUNC(rando_sp_set_##_name) { \
+    RECOMP_DLL_C_FUNC(rando_sp_set_##_name) { \
        sp_config->_name = RECOMP_ARG(_type, 1); \
     } 
 
@@ -25,18 +25,18 @@ RECOMP_DLL_FUNC(rando_sp_create_config) {
 
 // Get/Set for enums
 #define SP_GET_ENUM(_name) \
-    RECOMP_DLL_FUNC(rando_sp_get_##_name) { \
+    RECOMP_DLL_C_FUNC(rando_sp_get_##_name) { \
         RECOMP_RETURN(s32, (s32)sp_config->_name); \
     } 
 
 #define SP_SET_ENUM(_type, _name) \
-    RECOMP_DLL_FUNC(rando_sp_set_##_name) { \
+    RECOMP_DLL_C_FUNC(rando_sp_set_##_name) { \
        sp_config->_name = (_type) RECOMP_ARG(s32, 1); \
     } 
 
 #define SP_GET_SET_ENUM(_type, _name) \
-    SP_GET_ENUM(_name) \
-    SP_SET_ENUM(_type, _name)
+    extern "C" { SP_GET_ENUM(_name) \
+    SP_SET_ENUM(_type, _name) }
 
 SP_GET_SET_ENUM(SinglePlayerRandoConfig::Accessability, accessability);
 SP_GET_SET_ENUM(SinglePlayerRandoConfig::LogicDifficulty, logicDifficulty);
@@ -58,7 +58,7 @@ SP_GET_SET_32(bool, scrubSanity);
 SP_GET_SET_32(bool, cowSanity);
 SP_GET_SET_32(bool, shuffleCreatFairyRewards);
 SP_GET_SET_32(bool, fairySanity);
-SP_GET_SET_32(bool, start_with_consumables);
+SP_GET_SET_32(bool, startWithConsumables);
 SP_GET_SET_32(bool, permanentChateauRomani);
 SP_GET_SET_32(bool, startWithInvertedTime);
 SP_GET_SET_32(bool, recieveFilledWallets);
