@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include <string>
+#include <iostream>
 #include <filesystem>
 
 #if defined(_MSC_VER)
@@ -641,6 +642,7 @@ std::u8string _arg_u8string(uint8_t* rdram, recomp_context* ctx) {
     // Get the length of the byteswapped string.
     size_t len = 0;
     while (MEM_B(str, len) != 0x00) {
+        std::cout << MEM_B(str, len);
         len++;
     }
 
