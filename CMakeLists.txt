@@ -9,9 +9,9 @@ set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 set(CMAKE_INSTALL_RPATH "$\{ORIGIN\}")
 
 add_library(APCpp-Glue SHARED 
-    apcpp-singleplayer-config-exports.cpp
-    apcpp-singleplayer-config.cpp
-    apcpp-singleplayer-config.h
+    apcpp-yaml-config-exports.cpp
+    apcpp-yaml-config.cpp
+    apcpp-yaml-config.h
     apcpp-glue.cpp
     apcpp-glue.h
     Archipelago.h

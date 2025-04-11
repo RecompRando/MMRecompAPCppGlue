@@ -6,7 +6,7 @@
 #include <iostream>
 
 #include "apcpp-glue.h"
-#include "apcpp-singleplayer-config.h"
+#include "apcpp-yaml-config.h"
 
 namespace fs = std::filesystem;
 RECOMP_DLL_FUNC(rando_save_run_yaml) {
