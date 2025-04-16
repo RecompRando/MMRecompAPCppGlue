@@ -123,6 +123,16 @@ void getStr(uint8_t* rdram, PTR(char) ptr, std::string& outString) {
     }
 }
 
+void setStr(uint8_t* rdram, PTR(char) ptr, const char* inString) {
+    char c = -1;
+    u32 i = 0;
+    while (c != 0) {
+        c = inString[i];
+        MEM_B(i, (gpr) ptr) = c;
+        i += 1;
+    }
+}
+
 extern "C"
 {
     DLLEXPORT u32 recomp_api_version = 1;
@@ -501,6 +511,26 @@ extern "C"
                 _return(ctx, (u32) GI_AP_PROG);
                 return;
         }
+    }
+    
+    DLLEXPORT void rando_get_location_item_player(uint8_t* rdram, recomp_context* ctx)
+    {
+        u32 location_id_arg = _arg<0, u32>(rdram, ctx);
+        PTR(char) str_ptr = _arg<1, PTR(char)>(rdram, ctx);
+        
+        int64_t location_id = ((int64_t) (((int64_t) 0x3469420000000) | ((int64_t) fixLocation(location_id_arg))));
+        
+        setStr(rdram, str_ptr, AP_GetLocationItemPlayer(state, location_id));
+    }
+    
+    DLLEXPORT void rando_get_location_item_name(uint8_t* rdram, recomp_context* ctx)
+    {
+        u32 location_id_arg = _arg<0, u32>(rdram, ctx);
+        PTR(char) str_ptr = _arg<1, PTR(char)>(rdram, ctx);
+        
+        int64_t location_id = ((int64_t) (((int64_t) 0x3469420000000) | ((int64_t) fixLocation(location_id_arg))));
+        
+        setStr(rdram, str_ptr, AP_GetLocationItemName(state, location_id));
     }
     
     DLLEXPORT void rando_get_items_size(uint8_t* rdram, recomp_context* ctx)
