@@ -8,43 +8,43 @@
 #include "apcpp-glue.h"
 #include "apcpp-yaml-config.h"
 
+std::string yaml_text{};
+
 namespace fs = std::filesystem;
-RECOMP_DLL_FUNC(rando_save_run_yaml) {
-    std::u8string savepath_str = RECOMP_ARG_U8STR(0);
-    // std::u8string savepath_str = u8"testing 1 2 3\n";
-    u32 slot = RECOMP_ARG(u32, 1);
-    std::string yaml_text = RECOMP_ARG_STR(2);
-
-    std::cout << yaml_text;
-
-    fs::path savefile(savepath_str);
-    fs::path yamlfile = fs::path(savefile).parent_path().append(std::format("RANDO_SLOT_{}.yaml", slot));
-
-    std::ofstream out(yamlfile);
-    try {
-        out << yaml_text;
-    } catch (std::exception e){
-        std::cout << e.what();
-    }
-    out.close();
+RECOMP_DLL_FUNC(rando_yaml_init) {
+    yaml_text.clear();
 }
 
-RECOMP_DLL_FUNC(rando_append_run_yaml) {
-    std::u8string savepath_str = RECOMP_ARG_U8STR(0);
-    // std::u8string savepath_str = u8"testing 1 2 3\n";
-    u32 slot = RECOMP_ARG(u32, 1);
-    std::string yaml_text = RECOMP_ARG_STR(2);
+template <int arg_index>
+std::string _arg_string_length(uint8_t* rdram, recomp_context* ctx, u32 len) {
+    PTR(char) str = _arg<arg_index, PTR(char)>(rdram, ctx);
 
+    std::string ret{};
+    ret.resize(len);
+
+    for (size_t i = 0; i < len; i++) {
+        ret[i] = (char)MEM_B(str, i);
+    }
+
+    return ret;
+}
+
+RECOMP_DLL_FUNC(rando_yaml_puts) {
+    std::string to_append = _arg_string_length<0>(rdram, ctx, RECOMP_ARG(u32, 1));
+    yaml_text += to_append;
+}
+
+RECOMP_DLL_FUNC(rando_yaml_finalize) {
+    std::u8string savepath_str = RECOMP_ARG_U8STR(0);
     std::cout << yaml_text;
 
-    fs::path savefile(savepath_str);
-    fs::path yamlfile = fs::path(savefile).parent_path().append(std::format("RANDO_SLOT_{}.yaml", slot));
+    fs::path savepath(savepath_str);
+    fs::path yamlpath = savepath.parent_path() / "solo.yaml";
 
-    std::ofstream out = std::ofstream(yamlfile, std::ios::app);
+    std::ofstream out(yamlpath);
     try {
         out << yaml_text;
     } catch (std::exception e){
         std::cout << e.what();
     }
-    out.close();
 }
