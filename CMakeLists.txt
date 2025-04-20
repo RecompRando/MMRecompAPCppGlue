@@ -14,7 +14,7 @@ add_library(APCpp-Glue SHARED
     apcpp-yaml-config.h
     apcpp-glue.cpp
     apcpp-glue.h
-    Archipelago.h
+    lib/APCpp/Archipelago.h
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE lib/APCpp)
