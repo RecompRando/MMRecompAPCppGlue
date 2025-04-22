@@ -10,11 +10,8 @@ set(CMAKE_INSTALL_RPATH "$\{ORIGIN\}")
 
 add_library(APCpp-Glue SHARED 
     apcpp-yaml-config-exports.cpp
-    apcpp-yaml-config.cpp
-    apcpp-yaml-config.h
     apcpp-glue.cpp
     apcpp-glue.h
-    lib/APCpp/Archipelago.h
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE lib/APCpp)

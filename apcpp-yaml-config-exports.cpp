@@ -6,7 +6,6 @@
 #include <iostream>
 
 #include "apcpp-glue.h"
-#include "apcpp-yaml-config.h"
 
 std::string yaml_text{};
 
