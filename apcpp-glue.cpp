@@ -5,6 +5,7 @@
 
 #include "Archipelago.h"
 #include "apcpp-glue.h"
+#include "apcpp-solo-gen.h"
 
 void glueGetLine(std::ifstream& in, std::string& outString)
 {
@@ -414,6 +415,10 @@ extern "C"
         }
 
         _return<u32>(ctx, seed_date_size);
+    }
+
+    DLLEXPORT void rando_solo_generate(uint8_t* rdram, recomp_context* ctx) {
+        sologen::generate(seed_folder / sologen::yaml_folder, seed_folder);
     }
     
     DLLEXPORT void rando_skulltulas_enabled(uint8_t* rdram, recomp_context* ctx)

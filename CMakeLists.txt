@@ -11,10 +11,14 @@ set(CMAKE_INSTALL_RPATH "$\{ORIGIN\}")
 add_library(APCpp-Glue SHARED 
     apcpp-yaml-config-exports.cpp
     apcpp-glue.cpp
+    apcpp-solo-gen.cpp
     apcpp-glue.h
+    apcpp-solo-gen.h
 )
 
-target_include_directories(${PROJECT_NAME} PRIVATE lib/APCpp)
+find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+
+target_include_directories(${PROJECT_NAME} PRIVATE lib/APCpp ${Python3_INCLUDE_DIRS})
 
 if (WIN32)
     target_link_libraries(${PROJECT_NAME} ws2_32)
@@ -25,4 +29,4 @@ endif(WIN32)
 add_subdirectory(lib/APCpp)
 include_directories(lib/APCpp)
 
-target_link_libraries(${PROJECT_NAME} APCpp-static)
+target_link_libraries(${PROJECT_NAME} APCpp-static ${Python3_LIBRARY_RELEASE})
