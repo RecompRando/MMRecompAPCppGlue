@@ -26,8 +26,7 @@ check_and_install_requirements()
 site_packages = os.path.dirname(os.__file__)
 output_dir = sys.argv[1]
 minipelago_zip = os.path.join(output_dir, "minipelago.zip")
-stdlib_zip = os.path.join(output_dir, "python311.zip")
-print(f"Packaging MMRecompRando to {minipelago_zip} and Python to {stdlib_zip}")
+print(f"Packaging MMRecompRando to {minipelago_zip}")
 
 standard_lib_dependencies = [
     "__future__.py",
@@ -94,6 +93,7 @@ standard_lib_dependencies = [
     "weakref.py",
     "websockets",
     "zipfile.py",
+    "selectors.py"
 ]
 
 package_dependencies = [
@@ -167,8 +167,6 @@ with zipfile.ZipFile(minipelago_zip, 'w', zipfile.ZIP_DEFLATED) as zipf:
                 dest_path = os.path.join("worlds", world, rel_path)
                 add_file_to_zip(zipf, full_path, dest_path)
 
-# Copy standard library files
-with zipfile.ZipFile(stdlib_zip, 'w', zipfile.ZIP_DEFLATED) as zipf:
     # Copy necessary dependencies
     for package in standard_lib_dependencies:
         package_root = os.path.join(site_packages, package)
@@ -212,9 +210,7 @@ with zipfile.ZipFile(stdlib_zip, 'w', zipfile.ZIP_DEFLATED) as zipf:
                         add_file_to_zip(zipf, full_path, dest_path)
 
 minipelago_zip_c = minipelago_zip + ".c"
-stdlib_zip_c = stdlib_zip + ".c"
 
 bin_to_c_array(minipelago_zip, minipelago_zip_c, "minipelago_zip")
-bin_to_c_array(stdlib_zip, stdlib_zip_c, "python_zip")
 
-print(f"Packaging complete. Files are in {minipelago_zip_c} and {stdlib_zip_c}")
+print(f"Packaging and array conversion complete in {minipelago_zip_c}")

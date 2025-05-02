@@ -40,8 +40,9 @@ struct ZipEntry {
     std::filesystem::path name;
 };
 
+// This allows for multiple zips to be copied, but only one ended up being used.
+// There may be a use case for multiple zips in the future.
 ZipEntry zips[] = {
-    { .data = python_zip, .size = python_zip_len, .name = "pythonlib.zip" },
     { .data = minipelago_zip, .size = minipelago_zip_len, .name = "minipelago.zip" },
 };
 
@@ -127,7 +128,7 @@ bool sologen::generate(const std::filesystem::path& yaml_dir, const std::filesys
 
     // remove last path entry and add the zip file based on the current dynamic library path
     PyRun_SimpleString("sys.path.pop()");
-    auto mod_zip_path = std::string("sys.path.insert(0, '") + path_to_string_utf8(output_dir / zips[1].name) + "')";
+    auto mod_zip_path = std::string("sys.path.insert(0, '") + path_to_string_utf8(output_dir / zips[0].name) + "')";
     PyRun_SimpleString(mod_zip_path.c_str());
 
     // debug print sys.path

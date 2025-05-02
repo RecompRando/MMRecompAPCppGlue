@@ -51,12 +51,11 @@ add_subdirectory(lib/APCpp)
 include_directories(lib/APCpp lib/APCpp/jsoncpp/include)
 
 # Define paths to the outputs
-set(PYTHON_ZIP_C "${CMAKE_BINARY_DIR}/python311.zip.c")
 set(MINIPELAGO_ZIP_C "${CMAKE_BINARY_DIR}/minipelago.zip.c")
 
 # Ensure the Python script always runs and generates the C files
 add_custom_command(
-    OUTPUT "${CMAKE_BINARY_DIR}/dummy" "${PYTHON_ZIP_C}" "${MINIPELAGO_ZIP_C}"
+    OUTPUT "${CMAKE_BINARY_DIR}/dummy" "${MINIPELAGO_ZIP_C}"
     COMMAND "${PYTHON_EXE}" "${CMAKE_SOURCE_DIR}/minipelago/package.py" "${CMAKE_BINARY_DIR}"
     DEPENDS "${CMAKE_SOURCE_DIR}/minipelago/package.py" # Ensure the Python script is up-to-date
     COMMENT "Packaging zips and generating C arrays"
@@ -70,6 +69,6 @@ add_custom_target(generate_c_arrays ALL
 )
 
 add_dependencies(APCpp-Glue generate_c_arrays)
-target_sources(APCpp-Glue PRIVATE "${PYTHON_ZIP_C}" "${MINIPELAGO_ZIP_C}")
+target_sources(APCpp-Glue PRIVATE "${MINIPELAGO_ZIP_C}")
 target_link_libraries(APCpp-Glue PRIVATE APCpp-static python_standalone)
 link_python_standalone(APCpp-Glue)
