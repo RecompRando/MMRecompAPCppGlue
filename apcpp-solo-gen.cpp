@@ -1,6 +1,8 @@
 #include <cstdio>
 #include <fstream>
 #include <filesystem>
+#include <cstring>
+#include <vector>
 
 #include "apcpp-solo-gen.h"
 

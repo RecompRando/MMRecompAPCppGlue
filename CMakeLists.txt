@@ -19,8 +19,16 @@ if(WIN32)
     else()
         message(FATAL_ERROR "Unknown pointer size.")
     endif()
-else()
-    message(FATAL_ERROR "Unsupported platform.")
+elseif(CMAKE_SYSTEM_NAME MATCHES "Linux")
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+        # 64-bit Linux
+        include(${CMAKE_SOURCE_DIR}/PythonStandalone_Linux_x64.cmake)
+    elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
+        # 32-bit Linux
+        message(FATAL_ERROR "Building for 32-bit Linux not supported.")
+    else()
+        message(FATAL_ERROR "Unknown pointer size.")
+    endif()
 endif()
 
 add_library(APCpp-Glue SHARED 
@@ -40,7 +48,7 @@ else()
 endif(WIN32)
 
 add_subdirectory(lib/APCpp)
-include_directories(lib/APCpp)
+include_directories(lib/APCpp lib/APCpp/jsoncpp/include)
 
 # Define paths to the outputs
 set(PYTHON_ZIP_C "${CMAKE_BINARY_DIR}/python311.zip.c")
