@@ -27,10 +27,12 @@ void glueGetLine(std::ifstream& in, std::string& outString)
 }
 
 AP_State* state;
-std::filesystem::path seed_folder;
-std::vector<std::u8string> seed_list;
-std::vector<std::string> seed_timestamps;
-constexpr std::u8string_view gen_file_suffix = u8"_gen.json";
+std::u8string room_seed_name;
+std::filesystem::path solo_seed_folder;
+std::vector<std::u8string> solo_seed_list;
+std::vector<std::string> solo_seed_timestamps;
+constexpr std::u8string_view gen_file_prefix = u8"AP_";
+constexpr std::u8string_view gen_file_suffix = u8"_solo.zip";
 
 u32 hasItem(u64 itemId)
 {
@@ -316,24 +318,36 @@ extern "C"
         
         state = AP_New();
         AP_Init(state, address.c_str(), "Majora's Mask Recompiled", playerName.c_str(), password.c_str());
-        //AP_Init("apsolostartinventory.json");
 
-        _return<u32>(ctx, rando_init_common());
+        bool success = rando_init_common();
+        if (success) {
+            AP_RoomInfo roomInfo{};
+            AP_GetRoomInfo(state, &roomInfo);
+            room_seed_name = std::u8string{ reinterpret_cast<const char8_t*>(roomInfo.seed_name.data()), roomInfo.seed_name.size() };
+        }
+
+        _return<u32>(ctx, success);
     }
 
     DLLEXPORT void rando_init_solo(uint8_t* rdram, recomp_context* ctx) {
         u32 selected_seed = _arg<0, u32>(rdram, ctx);
 
-        if (selected_seed >= seed_list.size()) {
+        if (selected_seed >= solo_seed_list.size()) {
             _return<u32>(ctx, false);
             return;
         }
 
         state = AP_New();
-        std::filesystem::path gen_file = seed_folder / (seed_list[selected_seed] + std::u8string{ gen_file_suffix });
-        AP_InitSolo(state, reinterpret_cast<const char*>(gen_file.u8string().c_str()));
+        const std::u8string& seed = solo_seed_list[selected_seed];
+        std::filesystem::path gen_file = solo_seed_folder / (std::u8string{ gen_file_prefix } + seed + std::u8string{ gen_file_suffix });
+        AP_InitSolo(state, reinterpret_cast<const char*>(gen_file.u8string().c_str()), reinterpret_cast<const char*>(seed.c_str()));
+
+        bool success = rando_init_common();
+        if (success) {
+            room_seed_name = seed;
+        }
         
-        _return<u32>(ctx, rando_init_common());
+        _return<u32>(ctx, success);
     }
 
     DLLEXPORT void rando_scan_solo_seeds(uint8_t* rdram, recomp_context* ctx) {
@@ -344,25 +358,25 @@ extern "C"
 
         std::filesystem::path save_file_path{ save_file_path_str };
 
-        seed_folder = save_file_path.parent_path();
-        seed_list.clear();
-        seed_timestamps.clear();
+        solo_seed_folder = save_file_path.parent_path();
+        solo_seed_list.clear();
+        solo_seed_timestamps.clear();
 
-        for (const auto& file : std::filesystem::directory_iterator{ seed_folder }) {
+        for (const auto& file : std::filesystem::directory_iterator{ solo_seed_folder }) {
             std::error_code ec;
             if (file.is_regular_file(ec)) {
                 std::filesystem::path filename = file.path().filename();
                 std::u8string filename_str = filename.u8string();
-                if (filename_str.ends_with(gen_file_suffix)) {
-                    seed_list.emplace_back(filename_str.substr(0, filename_str.size() - gen_file_suffix.size()));
-                    seed_timestamps.emplace_back(format_file_time(std::filesystem::last_write_time(file)));
+                if (filename_str.starts_with(gen_file_prefix) && filename_str.ends_with(gen_file_suffix)) {
+                    solo_seed_list.emplace_back(filename_str.substr(gen_file_prefix.size(), filename_str.size() - gen_file_prefix.size() - gen_file_suffix.size()));
+                    solo_seed_timestamps.emplace_back(format_file_time(std::filesystem::last_write_time(file)));
                 }
             }
         }
     }
 
     DLLEXPORT void rando_solo_count(uint8_t* rdram, recomp_context* ctx) {
-        _return(ctx, static_cast<u32>(seed_list.size()));
+        _return(ctx, static_cast<u32>(solo_seed_list.size()));
     }
 
     DLLEXPORT void rando_solo_get_name(uint8_t* rdram, recomp_context* ctx) {
@@ -370,22 +384,22 @@ extern "C"
         PTR(char) seed_name_out = _arg<1, PTR(char)>(rdram, ctx);
         u32 seed_name_out_len = _arg<2, u32>(rdram, ctx);
 
-        if (seed_index >= seed_list.size()) {
+        if (seed_index >= solo_seed_list.size()) {
             _return<u32>(ctx, 0);
             return;
         }
         
-        const std::u8string& seed_name = seed_list[seed_index];
-        u32 seed_name_size = static_cast<u32>(seed_name.size() + 1);
+        const std::u8string& solo_seed_name = solo_seed_list[seed_index];
+        u32 seed_name_size = static_cast<u32>(solo_seed_name.size() + 1);
         
         if (seed_name_out_len == 0) {
             // Write nothing if the output length is 0.
         }
-        else if (seed_name.size() + 1 >= seed_name_out_len) {
-            setU8Str(rdram, seed_name_out, seed_name.substr(0, seed_name_out_len - 1).c_str());
+        else if (solo_seed_name.size() + 1 >= seed_name_out_len) {
+            setU8Str(rdram, seed_name_out, solo_seed_name.substr(0, seed_name_out_len - 1).c_str());
         }
         else {
-            setU8Str(rdram, seed_name_out, seed_name.c_str());
+            setU8Str(rdram, seed_name_out, solo_seed_name.c_str());
         }
 
         _return<u32>(ctx, seed_name_size);
@@ -396,12 +410,12 @@ extern "C"
         PTR(char) seed_date_out = _arg<1, PTR(char)>(rdram, ctx);
         u32 seed_date_out_len = _arg<2, u32>(rdram, ctx);
 
-        if (seed_index >= seed_list.size()) {
+        if (seed_index >= solo_seed_list.size()) {
             _return<u32>(ctx, 0);
             return;
         }
         
-        const std::string& seed_date = seed_timestamps[seed_index];
+        const std::string& seed_date = solo_seed_timestamps[seed_index];
         u32 seed_date_size = static_cast<u32>(seed_date.size() + 1);
         
         if (seed_date_out_len == 0) {
@@ -417,8 +431,27 @@ extern "C"
         _return<u32>(ctx, seed_date_size);
     }
 
+    DLLEXPORT void rando_get_seed_name(uint8_t* rdram, recomp_context* ctx) {
+        PTR(char) seed_name_out = _arg<0, PTR(char)>(rdram, ctx);
+        u32 seed_name_out_len = _arg<1, u32>(rdram, ctx);
+        
+        u32 seed_name_size = static_cast<u32>(room_seed_name.size() + 1);
+        
+        if (seed_name_out_len == 0) {
+            // Write nothing if the output length is 0.
+        }
+        else if (room_seed_name.size() + 1 >= seed_name_out_len) {
+            setU8Str(rdram, seed_name_out, room_seed_name.substr(0, seed_name_out_len - 1).c_str());
+        }
+        else {
+            setU8Str(rdram, seed_name_out, room_seed_name.c_str());
+        }
+
+        _return<u32>(ctx, seed_name_size);
+    }
+
     DLLEXPORT void rando_solo_generate(uint8_t* rdram, recomp_context* ctx) {
-        sologen::generate(seed_folder / sologen::yaml_folder, seed_folder);
+        sologen::generate(solo_seed_folder / sologen::yaml_folder, solo_seed_folder);
     }
     
     DLLEXPORT void rando_skulltulas_enabled(uint8_t* rdram, recomp_context* ctx)
