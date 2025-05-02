@@ -23,7 +23,7 @@ std::string path_to_string_utf8(const std::filesystem::path& path) {
     return ret;
 }
 
-void sologen::generate(const std::filesystem::path& yaml_dir, const std::filesystem::path& output_dir) {
+bool sologen::generate(const std::filesystem::path& yaml_dir, const std::filesystem::path& output_dir) {
     PyStatus status;
     
     PyPreConfig preconfig;
@@ -70,13 +70,34 @@ void sologen::generate(const std::filesystem::path& yaml_dir, const std::filesys
     // Set sys.argv
     PySys_SetObject("argv", py_argv);
 
-    PyRun_SimpleString(
+    PyObject* globals = PyDict_New();
+    PyObject* locals = PyDict_New();
+    PyObject* result = PyRun_String(
         "from MMGenerate import main as generate\n"
-        "generate()"
+        "generate()",
+        Py_file_input, globals, locals
     );
+
+    bool success;
+    if (result) {
+        success = true;
+        Py_DECREF(result);
+    }
+    else {
+        success = false;
+        // Exception occurred
+        if (PyErr_Occurred()) {
+            PyErr_Print();  // Print to stderr
+        }
+    }
+
+    Py_DECREF(globals);
+    Py_DECREF(locals);
 
     Py_DECREF(py_argv);
 
     // finalize python
     Py_Finalize();
+
+    return success;
 }

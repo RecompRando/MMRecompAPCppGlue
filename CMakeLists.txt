@@ -16,7 +16,7 @@ add_library(APCpp-Glue SHARED
     apcpp-solo-gen.h
 )
 
-find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+find_package(Python3 3.11 EXACT COMPONENTS Interpreter Development REQUIRED)
 
 target_include_directories(${PROJECT_NAME} PRIVATE lib/APCpp ${Python3_INCLUDE_DIRS})
 

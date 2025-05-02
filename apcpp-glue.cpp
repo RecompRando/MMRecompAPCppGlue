@@ -474,7 +474,7 @@ extern "C"
     }
 
     DLLEXPORT void rando_solo_generate(uint8_t* rdram, recomp_context* ctx) {
-        sologen::generate(solo_state.seed_folder / sologen::yaml_folder, solo_state.seed_folder);
+        _return<u32>(ctx, sologen::generate(solo_state.seed_folder / sologen::yaml_folder, solo_state.seed_folder));
     }
     
     DLLEXPORT void rando_skulltulas_enabled(uint8_t* rdram, recomp_context* ctx)

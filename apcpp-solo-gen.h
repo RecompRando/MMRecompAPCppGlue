@@ -8,7 +8,7 @@
 namespace sologen {
     constexpr std::u8string_view yaml_folder = u8"solo_yaml"; 
     constexpr std::u8string_view yaml_filename = u8"solo.yaml"; 
-    void generate(const std::filesystem::path& yaml_dir, const std::filesystem::path& output_dir);
+    bool generate(const std::filesystem::path& yaml_dir, const std::filesystem::path& output_dir);
 }
 
 #endif
