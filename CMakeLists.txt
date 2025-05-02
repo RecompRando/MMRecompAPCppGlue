@@ -8,6 +8,21 @@ set(CMAKE_SKIP_BUILD_RPATH FALSE)
 set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 set(CMAKE_INSTALL_RPATH "$\{ORIGIN\}")
 
+# Include the script to download and set up the Python binary
+if(WIN32)
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+        # 64-bit Windows
+        include(${CMAKE_SOURCE_DIR}/PythonStandalone_Win_x64.cmake)
+    elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
+        # 32-bit Windows
+        message(FATAL_ERROR "Building for 32-bit Windows not supported.")
+    else()
+        message(FATAL_ERROR "Unknown pointer size.")
+    endif()
+else()
+    message(FATAL_ERROR "Unsupported platform.")
+endif()
+
 add_library(APCpp-Glue SHARED 
     apcpp-yaml-config-exports.cpp
     apcpp-glue.cpp
@@ -16,12 +31,10 @@ add_library(APCpp-Glue SHARED
     apcpp-solo-gen.h
 )
 
-find_package(Python3 3.11 EXACT COMPONENTS Interpreter Development REQUIRED)
-
-target_include_directories(${PROJECT_NAME} PRIVATE lib/APCpp ${Python3_INCLUDE_DIRS})
+target_include_directories(APCpp-Glue PRIVATE lib/APCpp)
 
 if (WIN32)
-    target_link_libraries(${PROJECT_NAME} ws2_32)
+    target_link_libraries(APCpp-Glue PRIVATE ws2_32)
 else()
     set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -fPIC")
 endif(WIN32)
@@ -29,4 +42,5 @@ endif(WIN32)
 add_subdirectory(lib/APCpp)
 include_directories(lib/APCpp)
 
-target_link_libraries(${PROJECT_NAME} APCpp-static ${Python3_LIBRARY_RELEASE})
+target_link_libraries(APCpp-Glue PRIVATE APCpp-static python_standalone)
+link_python_standalone(APCpp-Glue)
