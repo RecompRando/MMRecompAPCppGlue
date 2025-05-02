@@ -43,5 +43,5 @@ function(link_python_standalone TARGET_NAME)
     )
 endfunction()
 
-# Optional: make this info visible to parent CMake projects
+set(PYTHON_EXE "${PYTHON_ROOT}/python.exe" CACHE PATH "Python executable")
 set(PYTHON_STANDALONE_ROOT "${PYTHON_ROOT}" CACHE PATH "Root of extracted Python standalone distribution")

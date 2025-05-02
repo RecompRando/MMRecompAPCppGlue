@@ -1,4 +1,6 @@
 #include <cstdio>
+#include <fstream>
+#include <filesystem>
 
 #include "apcpp-solo-gen.h"
 
@@ -23,7 +25,83 @@ std::string path_to_string_utf8(const std::filesystem::path& path) {
     return ret;
 }
 
+extern "C" {
+    extern unsigned char python_zip[];
+    extern unsigned char minipelago_zip[];
+    extern int python_zip_len;
+    extern int minipelago_zip_len;
+}
+
+struct ZipEntry {
+    unsigned char* data;
+    int size;
+    std::filesystem::path name;
+};
+
+ZipEntry zips[] = {
+    { .data = python_zip, .size = python_zip_len, .name = "pythonlib.zip" },
+    { .data = minipelago_zip, .size = minipelago_zip_len, .name = "minipelago.zip" },
+};
+
+// Writes a zip to disk.
+void write_zip(const std::filesystem::path& zip_path, const ZipEntry& zip) {
+    std::ofstream out{ zip_path, std::ios::binary };
+    out.write(reinterpret_cast<const char*>(zip.data), zip.size);
+}
+
+// Checks if the zip on disk (if it exists) is identical to the one that will be written.
+bool compare_zip(const std::filesystem::path& zip_path, const ZipEntry& zip) {
+    // If the file doesn't exist then it's not equivalent.
+    if (!std::filesystem::exists(zip_path)) {
+        return false;
+    }
+
+    std::ifstream old_zip{ zip_path, std::ios::binary };
+
+    // If the file couldn't be opened, treat it as not equivalent.
+    if (!old_zip.good()) {
+        return false;
+    }
+
+    // If the file is a different size then it's not equivalent.
+    old_zip.seekg(0, std::ios::end);
+    size_t old_zip_size = old_zip.tellg();
+    if (old_zip_size != zip.size) {
+        return false;
+    }
+
+    // Read the file's contents.
+    old_zip.seekg(0, std::ios::beg);
+    std::vector<char> data;
+    data.resize(old_zip_size);
+    old_zip.read(data.data(), data.size());
+
+    // Compare the two files.
+    return std::memcmp(data.data(), zip.data, old_zip_size) == 0;
+}
+
+// Writes any zips that aren't identical to the contents in memory. 
+void update_zips(const std::filesystem::path& zips_dir) {
+    for (size_t i = 0; i < std::size(zips); i++) {
+        std::filesystem::path zip_path = zips_dir / zips[i].name;
+        if (!compare_zip(zip_path, zips[i])) {
+            printf("Zip %s differed\n", zips[i].name.string().c_str());
+            write_zip(zip_path, zips[i]);
+        }
+        else {
+            printf("Zip %s was the same\n", zips[i].name.string().c_str());
+        }
+    }
+}
+
 bool sologen::generate(const std::filesystem::path& yaml_dir, const std::filesystem::path& output_dir) {
+    // Update the zips the first time a generation runs.
+    static bool updated_zips = false;
+    if (!updated_zips) {
+        update_zips(output_dir);
+        updated_zips = true;
+    }
+
     PyStatus status;
     
     PyPreConfig preconfig;
@@ -36,9 +114,7 @@ bool sologen::generate(const std::filesystem::path& yaml_dir, const std::filesys
     PyConfig_SetBytesString(&config, &config.program_name, "minipelago");
     
     wchar_t* zip_path = nullptr;
-    status = PyConfig_SetBytesString(&config, &zip_path, path_to_string_utf8(output_dir / "python311.zip").c_str());
-    // status = PyConfig_SetBytesString(&config, &zip_path, "C:/n64/MMRecompRandoMinipelago/build/minipelago/minipelago.zip");
-    // status = PyConfig_SetBytesString(&config, &zip_path, "C:\\\\Users\\\\aaron\\\\AppData\\\\Local\\\\Zelda64Recompiled\\\\saves\\\\mm_recomp_rando\\\\python311.zip");
+    status = PyConfig_SetBytesString(&config, &zip_path, path_to_string_utf8(output_dir / zips[0].name).c_str());
 
     config.module_search_paths_set = 1;
     PyWideStringList_Append(&config.module_search_paths, zip_path);
@@ -49,7 +125,7 @@ bool sologen::generate(const std::filesystem::path& yaml_dir, const std::filesys
 
     // remove last path entry and add the zip file based on the current dynamic library path
     PyRun_SimpleString("sys.path.pop()");
-    auto mod_zip_path = std::string("sys.path.insert(0, '") + path_to_string_utf8(output_dir / "minipelago.zip") + "')";
+    auto mod_zip_path = std::string("sys.path.insert(0, '") + path_to_string_utf8(output_dir / zips[1].name) + "')";
     PyRun_SimpleString(mod_zip_path.c_str());
 
     // debug print sys.path
