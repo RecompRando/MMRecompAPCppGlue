@@ -2,6 +2,7 @@
 #include <fstream>
 #include <chrono>
 #include <iomanip>
+#include <algorithm>
 
 #include "Archipelago.h"
 #include "apcpp-glue.h"
@@ -26,11 +27,21 @@ void glueGetLine(std::ifstream& in, std::string& outString)
     }
 }
 
+struct SoloSeed {
+    std::u8string seed_name;
+    std::filesystem::file_time_type timestamp;
+    std::string date_string;
+};
+
+struct SoloState {
+    std::vector<SoloSeed> seeds;
+    std::filesystem::path seed_folder;
+};
+
 AP_State* state;
+SoloState solo_state;
 std::u8string room_seed_name;
-std::filesystem::path solo_seed_folder;
-std::vector<std::u8string> solo_seed_list;
-std::vector<std::string> solo_seed_timestamps;
+
 constexpr std::u8string_view gen_file_prefix = u8"AP_";
 constexpr std::u8string_view gen_file_suffix = u8"_solo.zip";
 
@@ -182,7 +193,7 @@ std::string format_file_time(std::filesystem::file_time_type time) {
 
     std::stringstream sstream{};
 
-    sstream << std::put_time(&time_tm, "%b %e %y");
+    sstream << std::put_time(&time_tm, "%b %e %y %I:%M:%S %p");
 
     return sstream.str();
 }
@@ -332,14 +343,14 @@ extern "C"
     DLLEXPORT void rando_init_solo(uint8_t* rdram, recomp_context* ctx) {
         u32 selected_seed = _arg<0, u32>(rdram, ctx);
 
-        if (selected_seed >= solo_seed_list.size()) {
+        if (selected_seed >= solo_state.seeds.size()) {
             _return<u32>(ctx, false);
             return;
         }
 
         state = AP_New();
-        const std::u8string& seed = solo_seed_list[selected_seed];
-        std::filesystem::path gen_file = solo_seed_folder / (std::u8string{ gen_file_prefix } + seed + std::u8string{ gen_file_suffix });
+        const std::u8string& seed = solo_state.seeds[selected_seed].seed_name;
+        std::filesystem::path gen_file = solo_state.seed_folder / (std::u8string{ gen_file_prefix } + seed + std::u8string{ gen_file_suffix });
         AP_InitSolo(state, reinterpret_cast<const char*>(gen_file.u8string().c_str()), reinterpret_cast<const char*>(seed.c_str()));
 
         bool success = rando_init_common();
@@ -358,25 +369,37 @@ extern "C"
 
         std::filesystem::path save_file_path{ save_file_path_str };
 
-        solo_seed_folder = save_file_path.parent_path();
-        solo_seed_list.clear();
-        solo_seed_timestamps.clear();
+        solo_state.seed_folder = save_file_path.parent_path();
+        solo_state.seeds.clear();
 
-        for (const auto& file : std::filesystem::directory_iterator{ solo_seed_folder }) {
+        for (const auto& file : std::filesystem::directory_iterator{ solo_state.seed_folder }) {
             std::error_code ec;
             if (file.is_regular_file(ec)) {
                 std::filesystem::path filename = file.path().filename();
                 std::u8string filename_str = filename.u8string();
                 if (filename_str.starts_with(gen_file_prefix) && filename_str.ends_with(gen_file_suffix)) {
-                    solo_seed_list.emplace_back(filename_str.substr(gen_file_prefix.size(), filename_str.size() - gen_file_prefix.size() - gen_file_suffix.size()));
-                    solo_seed_timestamps.emplace_back(format_file_time(std::filesystem::last_write_time(file)));
+                    // TODO use platform-specific APIs to get the actual file creation time instead of using the last write time.
+                    std::filesystem::file_time_type timestamp = std::filesystem::last_write_time(file);
+
+                    solo_state.seeds.emplace_back(SoloSeed {
+                        .seed_name = filename_str.substr(gen_file_prefix.size(), filename_str.size() - gen_file_prefix.size() - gen_file_suffix.size()),
+                        .timestamp = timestamp,
+                        .date_string = format_file_time(timestamp)
+                    });
                 }
             }
         }
+
+        // Sort the seeds by timestamp descending.
+        std::sort(solo_state.seeds.begin(), solo_state.seeds.end(),
+            [](const SoloSeed& lhs, const SoloSeed& rhs) {
+                return lhs.timestamp > rhs.timestamp;
+            }
+        );
     }
 
     DLLEXPORT void rando_solo_count(uint8_t* rdram, recomp_context* ctx) {
-        _return(ctx, static_cast<u32>(solo_seed_list.size()));
+        _return(ctx, static_cast<u32>(solo_state.seeds.size()));
     }
 
     DLLEXPORT void rando_solo_get_name(uint8_t* rdram, recomp_context* ctx) {
@@ -384,12 +407,12 @@ extern "C"
         PTR(char) seed_name_out = _arg<1, PTR(char)>(rdram, ctx);
         u32 seed_name_out_len = _arg<2, u32>(rdram, ctx);
 
-        if (seed_index >= solo_seed_list.size()) {
+        if (seed_index >= solo_state.seeds.size()) {
             _return<u32>(ctx, 0);
             return;
         }
         
-        const std::u8string& solo_seed_name = solo_seed_list[seed_index];
+        const std::u8string& solo_seed_name = solo_state.seeds[seed_index].seed_name;
         u32 seed_name_size = static_cast<u32>(solo_seed_name.size() + 1);
         
         if (seed_name_out_len == 0) {
@@ -410,12 +433,12 @@ extern "C"
         PTR(char) seed_date_out = _arg<1, PTR(char)>(rdram, ctx);
         u32 seed_date_out_len = _arg<2, u32>(rdram, ctx);
 
-        if (seed_index >= solo_seed_list.size()) {
+        if (seed_index >= solo_state.seeds.size()) {
             _return<u32>(ctx, 0);
             return;
         }
         
-        const std::string& seed_date = solo_seed_timestamps[seed_index];
+        const std::string& seed_date = solo_state.seeds[seed_index].date_string;
         u32 seed_date_size = static_cast<u32>(seed_date.size() + 1);
         
         if (seed_date_out_len == 0) {
@@ -451,7 +474,7 @@ extern "C"
     }
 
     DLLEXPORT void rando_solo_generate(uint8_t* rdram, recomp_context* ctx) {
-        sologen::generate(solo_seed_folder / sologen::yaml_folder, solo_seed_folder);
+        sologen::generate(solo_state.seed_folder / sologen::yaml_folder, solo_state.seed_folder);
     }
     
     DLLEXPORT void rando_skulltulas_enabled(uint8_t* rdram, recomp_context* ctx)
