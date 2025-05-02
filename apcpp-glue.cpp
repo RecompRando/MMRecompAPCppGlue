@@ -402,7 +402,7 @@ extern "C"
         _return(ctx, static_cast<u32>(solo_state.seeds.size()));
     }
 
-    DLLEXPORT void rando_solo_get_name(uint8_t* rdram, recomp_context* ctx) {
+    DLLEXPORT void rando_solo_get_seed_name(uint8_t* rdram, recomp_context* ctx) {
         u32 seed_index = _arg<0, u32>(rdram, ctx);
         PTR(char) seed_name_out = _arg<1, PTR(char)>(rdram, ctx);
         u32 seed_name_out_len = _arg<2, u32>(rdram, ctx);
