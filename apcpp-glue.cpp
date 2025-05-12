@@ -503,6 +503,11 @@ extern "C"
     {
         _return(ctx, AP_GetSlotDataInt(state, "shopsanity") != 0);
     }
+    
+    DLLEXPORT void rando_advanced_shops_enabled(uint8_t* rdram, recomp_context* ctx)
+    {
+        _return(ctx, AP_GetSlotDataInt(state, "shopsanity") == 2);
+    }
 
     DLLEXPORT void rando_scrubs_enabled(uint8_t* rdram, recomp_context* ctx)
     {
