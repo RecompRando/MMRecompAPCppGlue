@@ -7,6 +7,7 @@ import worlds
 from worlds.AutoWorld import AutoWorldRegister
 from worlds.mm_recomp import MMRWorld
 from Generate import main as generate_main
+from Main import main as ERMain
 from Utils import output_path
 
 # register the Majora's Mask Recompiled world type
@@ -43,7 +44,8 @@ zlib.compress = produce_json
 
 # our main function
 def main():
-    multiworld = generate_main()
+    erargs, seed = generate_main()
+    multiworld = ERMain(erargs, seed)
     zipfilename_old = output_path(f"AP_{multiworld.seed_name}.zip")
     zipfilename_new = output_path(f"AP_{multiworld.seed_name}_solo.zip")
     os.rename(zipfilename_old, zipfilename_new)
