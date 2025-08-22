@@ -324,6 +324,11 @@ extern "C"
                 AP_RemoveQueuedLocationScout(state, 0x3469420000091);
             }
         }
+
+        if (AP_GetSlotDataInt(state, "intro_checks") == 0)
+        {
+            AP_RemoveQueuedLocationScout(state, 0x3469420061A00);
+        }
         
         AP_SendQueuedLocationScouts(state, 0);
 
@@ -356,48 +361,55 @@ extern "C"
 
         _return<u32>(ctx, success);
     }
-
-    DLLEXPORT void rando_init_solo(uint8_t* rdram, recomp_context* ctx) {
+    
+    DLLEXPORT void rando_init_solo(uint8_t* rdram, recomp_context* ctx)
+    {
         u32 selected_seed = _arg<0, u32>(rdram, ctx);
-
-        if (selected_seed >= solo_state.seeds.size()) {
+        
+        if (selected_seed >= solo_state.seeds.size())
+        {
             _return<u32>(ctx, false);
             return;
         }
-
+        
         state = AP_New();
         const std::u8string& seed = solo_state.seeds[selected_seed].seed_name;
         std::filesystem::path gen_file = solo_state.seed_folder / (std::u8string{ gen_file_prefix } + seed + std::u8string{ gen_file_suffix });
         AP_InitSolo(state, reinterpret_cast<const char*>(gen_file.u8string().c_str()), reinterpret_cast<const char*>(seed.c_str()));
-
+        
         bool success = rando_init_common();
-        if (success) {
+        if (success)
+        {
             room_seed_name = seed;
         }
         
         _return<u32>(ctx, success);
     }
 
-    DLLEXPORT void rando_scan_solo_seeds(uint8_t* rdram, recomp_context* ctx) {
+    DLLEXPORT void rando_scan_solo_seeds(uint8_t* rdram, recomp_context* ctx)
+    {
         std::u8string save_file_path_str;
         PTR(char) save_file_path_ptr = _arg<0, PTR(char)>(rdram, ctx);
-
+        
         getU8Str(rdram, save_file_path_ptr, save_file_path_str);
-
+        
         std::filesystem::path save_file_path{ save_file_path_str };
-
+        
         solo_state.seed_folder = save_file_path.parent_path();
         solo_state.seeds.clear();
-
-        for (const auto& file : std::filesystem::directory_iterator{ solo_state.seed_folder }) {
+        
+        for (const auto& file : std::filesystem::directory_iterator{ solo_state.seed_folder })
+        {
             std::error_code ec;
-            if (file.is_regular_file(ec)) {
+            if (file.is_regular_file(ec))
+            {
                 std::filesystem::path filename = file.path().filename();
                 std::u8string filename_str = filename.u8string();
-                if (filename_str.starts_with(gen_file_prefix) && filename_str.ends_with(gen_file_suffix)) {
+                if (filename_str.starts_with(gen_file_prefix) && filename_str.ends_with(gen_file_suffix))
+                {
                     // TODO use platform-specific APIs to get the actual file creation time instead of using the last write time.
                     std::filesystem::file_time_type timestamp = std::filesystem::last_write_time(file);
-
+                    
                     solo_state.seeds.emplace_back(SoloSeed {
                         .seed_name = filename_str.substr(gen_file_prefix.size(), filename_str.size() - gen_file_prefix.size() - gen_file_suffix.size()),
                         .timestamp = timestamp,
@@ -406,25 +418,29 @@ extern "C"
                 }
             }
         }
-
+        
         // Sort the seeds by timestamp descending.
         std::sort(solo_state.seeds.begin(), solo_state.seeds.end(),
-            [](const SoloSeed& lhs, const SoloSeed& rhs) {
+            [](const SoloSeed& lhs, const SoloSeed& rhs)
+            {
                 return lhs.timestamp > rhs.timestamp;
             }
         );
     }
-
-    DLLEXPORT void rando_solo_count(uint8_t* rdram, recomp_context* ctx) {
+    
+    DLLEXPORT void rando_solo_count(uint8_t* rdram, recomp_context* ctx)
+    {
         _return(ctx, static_cast<u32>(solo_state.seeds.size()));
     }
 
-    DLLEXPORT void rando_solo_get_seed_name(uint8_t* rdram, recomp_context* ctx) {
+    DLLEXPORT void rando_solo_get_seed_name(uint8_t* rdram, recomp_context* ctx)
+    {
         u32 seed_index = _arg<0, u32>(rdram, ctx);
         PTR(char) seed_name_out = _arg<1, PTR(char)>(rdram, ctx);
         u32 seed_name_out_len = _arg<2, u32>(rdram, ctx);
-
-        if (seed_index >= solo_state.seeds.size()) {
+        
+        if (seed_index >= solo_state.seeds.size())
+        {
             _return<u32>(ctx, 0);
             return;
         }
@@ -432,25 +448,32 @@ extern "C"
         const std::u8string& solo_seed_name = solo_state.seeds[seed_index].seed_name;
         u32 seed_name_size = static_cast<u32>(solo_seed_name.size() + 1);
         
-        if (seed_name_out_len == 0) {
+        if (seed_name_out_len == 0)
+        {
             // Write nothing if the output length is 0.
         }
-        else if (solo_seed_name.size() + 1 >= seed_name_out_len) {
+        
+        else if (solo_seed_name.size() + 1 >= seed_name_out_len)
+        {
             setU8Str(rdram, seed_name_out, solo_seed_name.substr(0, seed_name_out_len - 1).c_str());
         }
-        else {
+        
+        else
+        {
             setU8Str(rdram, seed_name_out, solo_seed_name.c_str());
         }
-
+        
         _return<u32>(ctx, seed_name_size);
     }
 
-    DLLEXPORT void rando_solo_get_generation_date(uint8_t* rdram, recomp_context* ctx) {
+    DLLEXPORT void rando_solo_get_generation_date(uint8_t* rdram, recomp_context* ctx)
+    {
         u32 seed_index = _arg<0, u32>(rdram, ctx);
         PTR(char) seed_date_out = _arg<1, PTR(char)>(rdram, ctx);
         u32 seed_date_out_len = _arg<2, u32>(rdram, ctx);
-
-        if (seed_index >= solo_state.seeds.size()) {
+        
+        if (seed_index >= solo_state.seeds.size())
+        {
             _return<u32>(ctx, 0);
             return;
         }
@@ -458,39 +481,51 @@ extern "C"
         const std::string& seed_date = solo_state.seeds[seed_index].date_string;
         u32 seed_date_size = static_cast<u32>(seed_date.size() + 1);
         
-        if (seed_date_out_len == 0) {
+        if (seed_date_out_len == 0)
+        {
             // Write nothing if the output length is 0.
         }
-        else if (seed_date.size() + 1 >= seed_date_out_len) {
+        
+        else if (seed_date.size() + 1 >= seed_date_out_len)
+        {
             setStr(rdram, seed_date_out, seed_date.substr(0, seed_date_out_len - 1).c_str());
         }
-        else {
+        
+        else
+        {
             setStr(rdram, seed_date_out, seed_date.c_str());
         }
-
+        
         _return<u32>(ctx, seed_date_size);
     }
-
-    DLLEXPORT void rando_get_seed_name(uint8_t* rdram, recomp_context* ctx) {
+    
+    DLLEXPORT void rando_get_seed_name(uint8_t* rdram, recomp_context* ctx)
+    {
         PTR(char) seed_name_out = _arg<0, PTR(char)>(rdram, ctx);
         u32 seed_name_out_len = _arg<1, u32>(rdram, ctx);
         
         u32 seed_name_size = static_cast<u32>(room_seed_name.size() + 1);
         
-        if (seed_name_out_len == 0) {
+        if (seed_name_out_len == 0)
+        {
             // Write nothing if the output length is 0.
         }
-        else if (room_seed_name.size() + 1 >= seed_name_out_len) {
+        
+        else if (room_seed_name.size() + 1 >= seed_name_out_len)
+        {
             setU8Str(rdram, seed_name_out, room_seed_name.substr(0, seed_name_out_len - 1).c_str());
         }
-        else {
+        
+        else
+        {
             setU8Str(rdram, seed_name_out, room_seed_name.c_str());
         }
-
+        
         _return<u32>(ctx, seed_name_size);
     }
-
-    DLLEXPORT void rando_solo_generate(uint8_t* rdram, recomp_context* ctx) {
+    
+    DLLEXPORT void rando_solo_generate(uint8_t* rdram, recomp_context* ctx)
+    {
         _return<u32>(ctx, sologen::generate(solo_state.seed_folder / sologen::yaml_folder, solo_state.seed_folder));
     }
     
@@ -615,6 +650,16 @@ extern "C"
     DLLEXPORT void rando_get_majora_remains_required(uint8_t* rdram, recomp_context* ctx)
     {
         _return(ctx, (int) AP_GetSlotDataInt(state, "majora_remains_required"));
+    }
+    
+    DLLEXPORT void rando_get_random_seed(uint8_t* rdram, recomp_context* ctx)
+    {
+        _return(ctx, (u32) AP_GetSlotDataInt(state, "random_seed"));
+    }
+    
+    DLLEXPORT void rando_get_curiostity_shop_trades(uint8_t* rdram, recomp_context* ctx)
+    {
+        _return(ctx, (int) AP_GetSlotDataInt(state, "curiostity_shop_trades"));
     }
     
     DLLEXPORT void rando_get_tunic_color(uint8_t* rdram, recomp_context* ctx)
@@ -790,6 +835,12 @@ extern "C"
     DLLEXPORT void rando_get_own_slot_id(uint8_t* rdram, recomp_context* ctx)
     {
         _return(ctx, ((u32) AP_GetPlayerID(state)));
+    }
+    
+    DLLEXPORT void rando_get_own_slot_name(uint8_t* rdram, recomp_context* ctx)
+    {
+        PTR(char) str_ptr = _arg<0, PTR(char)>(rdram, ctx);
+        setStr(rdram, str_ptr, AP_GetPlayerName(state));
     }
     
     DLLEXPORT void rando_get_location_item_player(uint8_t* rdram, recomp_context* ctx)
