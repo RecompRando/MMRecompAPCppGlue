@@ -285,11 +285,6 @@ extern "C"
             AP_RemoveQueuedLocationScout(state, 0x346942005481E);
             AP_RemoveQueuedLocationScout(state, 0x3469420024234);
             
-            AP_RemoveQueuedLocationScout(state, 0x346942007C402);
-            AP_RemoveQueuedLocationScout(state, 0x346942007C404);
-            AP_RemoveQueuedLocationScout(state, 0x346942007C405);
-            AP_RemoveQueuedLocationScout(state, 0x346942007C407);
-            
             if (AP_GetSlotDataInt(state, "shopsanity") == 1)
             {
                 for (int i = SI_FAIRY_2; i <= SI_POTION_RED_3; ++i)
@@ -324,7 +319,15 @@ extern "C"
                 AP_RemoveQueuedLocationScout(state, 0x3469420000091);
             }
         }
-
+        
+        if (AP_GetSlotDataInt(state, "curiostity_shop_trades") == 0)
+        {
+            AP_RemoveQueuedLocationScout(state, 0x346942007C402);
+            AP_RemoveQueuedLocationScout(state, 0x346942007C404);
+            AP_RemoveQueuedLocationScout(state, 0x346942007C405);
+            AP_RemoveQueuedLocationScout(state, 0x346942007C407);
+        }
+        
         if (AP_GetSlotDataInt(state, "intro_checks") == 0)
         {
             AP_RemoveQueuedLocationScout(state, 0x3469420061A00);
