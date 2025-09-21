@@ -747,6 +747,18 @@ extern "C"
         int64_t location = 0x3469420000000 | fixLocation(arg);
         _return(ctx, (int) AP_GetLocationItemType(state, location));
     }
+
+    DLLEXPORT void rando_get_location_has_local_item(uint8_t* rdram, recomp_context* ctx) {
+        u32 arg = _arg<0, u32>(rdram, ctx);
+        int64_t location_id = ((int64_t) (((int64_t) 0x3469420000000) | ((int64_t) arg)));
+        _return(ctx, (int) AP_GetLocationHasLocalItem(state, location_id));
+    }
+
+    DLLEXPORT void rando_get_item_at_location(uint8_t* rdram, recomp_context* ctx) {
+        u32 arg = _arg<0, u32>(rdram, ctx);
+        int64_t location_id = ((int64_t) (((int64_t) 0x3469420000000) | ((int64_t) arg)));
+        _return(ctx, (int) AP_GetItemAtLocation(state, location_id) & 0xFFFFFF);
+    }
     
     DLLEXPORT void rando_get_item_id(uint8_t* rdram, recomp_context* ctx)
     {
@@ -1322,6 +1334,32 @@ extern "C"
         int64_t location_id = ((int64_t) (((int64_t) 0x3469420000000) | ((int64_t) fixLocation(arg))));
         AP_QueueLocationScout(state, location_id);
         AP_SendQueuedLocationScouts(state, 2);
+    }
+    
+    DLLEXPORT void rando_queue_scout(uint8_t* rdram, recomp_context* ctx)
+    {
+        u32 arg = _arg<0, u32>(rdram, ctx);
+        int64_t location_id = ((int64_t) (((int64_t) 0x3469420000000) | ((int64_t) arg)));
+        AP_QueueLocationScout(state, location_id);
+    }
+    
+    DLLEXPORT void rando_queue_scouts_all(uint8_t* rdram, recomp_context* ctx)
+    {
+        AP_QueueLocationScoutsAll(state);
+    }
+    
+    DLLEXPORT void rando_remove_queued_scout(uint8_t* rdram, recomp_context* ctx)
+    {
+        u32 arg = _arg<0, u32>(rdram, ctx);
+        int64_t location_id = ((int64_t) (((int64_t) 0x3469420000000) | ((int64_t) arg)));
+        AP_RemoveQueuedLocationScout(state, location_id);
+    }
+    
+    DLLEXPORT void rando_send_queued_scouts(uint8_t* rdram, recomp_context* ctx)
+    {
+        u32 arg = _arg<0, u32>(rdram, ctx);
+        int hint = (int) arg;
+        AP_SendQueuedLocationScouts(state, hint);
     }
     
     DLLEXPORT void rando_send_location(uint8_t* rdram, recomp_context* ctx)
