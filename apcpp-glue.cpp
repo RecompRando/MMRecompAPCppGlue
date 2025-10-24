@@ -1262,6 +1262,12 @@ extern "C"
         _return(ctx, ((u32) AP_GetReceivedItem(state, items_i)));
     }
     
+    DLLEXPORT void rando_get_item_location(uint8_t* rdram, recomp_context* ctx)
+    {
+        u32 items_i = _arg<0, u32>(rdram, ctx);
+        _return(ctx, ((s32) AP_GetReceivedItemLocation(state, items_i)));
+    }
+    
     DLLEXPORT void rando_get_sending_player(uint8_t* rdram, recomp_context* ctx)
     {
         u32 items_i = _arg<0, u32>(rdram, ctx);
