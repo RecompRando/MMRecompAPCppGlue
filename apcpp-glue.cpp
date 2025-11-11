@@ -623,6 +623,22 @@ extern "C"
         _return(ctx, (int) AP_GetSlotDataInt(state, "link_tunic_color"));
     }
     
+    DLLEXPORT void rando_get_game_is_oot(uint8_t* rdram, recomp_context* ctx)
+    {
+        u32 player = _arg<0, u32>(rdram, ctx);
+        std::string game = AP_GetPlayerGameFromSlot(state, player);
+        int game_is_oot = game == "Ocarina of Time" || game == "Ship of Harkinian";
+        _return(ctx, (int) game_is_oot);
+    }
+    
+    DLLEXPORT void rando_get_game_is_ww(uint8_t* rdram, recomp_context* ctx)
+    {
+        u32 player = _arg<0, u32>(rdram, ctx);
+        std::string game = AP_GetPlayerGameFromSlot(state, player);
+        int game_is_ww = game == "The Wind Waker";
+        _return(ctx, (int) game_is_ww);
+    }
+    
     DLLEXPORT void rando_get_shop_price(uint8_t* rdram, recomp_context* ctx)
     {
         u32 arg = _arg<0, u32>(rdram, ctx);
