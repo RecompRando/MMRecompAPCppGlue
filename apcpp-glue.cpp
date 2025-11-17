@@ -645,6 +645,13 @@ extern "C"
         _return(ctx, (s16) prices[arg]);
     }
     
+    DLLEXPORT void rando_location_exists(uint8_t* rdram, recomp_context* ctx)
+    {
+        u32 arg = _arg<0, u32>(rdram, ctx);
+        int64_t location = 0x3469420000000 | fixLocation(arg);
+        _return(ctx, (int) AP_LocationExists(state, location));
+    }
+    
     DLLEXPORT void rando_get_location_type(uint8_t* rdram, recomp_context* ctx)
     {
         u32 arg = _arg<0, u32>(rdram, ctx);
