@@ -336,14 +336,35 @@ extern "C"
             AP_RemoveQueuedLocationScout(state, 0x346942007C407);
         }
 
-        if (AP_GetSlotDataInt(state, "shuffle_treasure_chest_game") == 0)
+        if (AP_GetSlotDataInt(state, "shuffle_minigames") == 0) // Disabled
+        {
+            AP_RemoveQueuedLocationScout(state, 0x3469420000023); // Town 40-49
+            AP_RemoveQueuedLocationScout(state, 0x346942007011D); // Town 50
+            AP_RemoveQueuedLocationScout(state, 0x34694200800B5); // H&D Any Day
+            AP_RemoveQueuedLocationScout(state, 0x34694200700B5); // H&D All Days
+            AP_RemoveQueuedLocationScout(state, 0x34694200801C9); // Playground Any Day
+            AP_RemoveQueuedLocationScout(state, 0x34694200701C9); // Playground All Days
+            AP_RemoveQueuedLocationScout(state, 0x3469420000024); // Swamp 2120
+            AP_RemoveQueuedLocationScout(state, 0x346942008011D); // Swamp 2180
+            AP_RemoveQueuedLocationScout(state, 0x3469420070292); // Fisherman Game
+        }
+        else if (AP_GetSlotDataInt(state, "shuffle_minigames") == 1) // Single
+        {
+            AP_RemoveQueuedLocationScout(state, 0x3469420000023); // Town 40-49
+            AP_RemoveQueuedLocationScout(state, 0x34694200800B5); // H&D Any Day
+            AP_RemoveQueuedLocationScout(state, 0x34694200801C9); // Playground Any Day
+            AP_RemoveQueuedLocationScout(state, 0x3469420000024); // Swamp 2120
+            AP_RemoveQueuedLocationScout(state, 0x3469420070292); // Fisherman Game
+        }
+
+        if (AP_GetSlotDataInt(state, "shuffle_treasure_chest_game") == 0) // Disabled
         {
             AP_RemoveQueuedLocationScout(state, 0x3469420061705); // Human
             AP_RemoveQueuedLocationScout(state, 0x346942006172A); // Deku
             AP_RemoveQueuedLocationScout(state, 0x346942006170C); // Goron
             AP_RemoveQueuedLocationScout(state, 0x3469420061704); // Zora
         }
-        else if (AP_GetSlotDataInt(state, "shuffle_treasure_chest_game") == 1)
+        else if (AP_GetSlotDataInt(state, "shuffle_treasure_chest_game") == 1) // Goron Only
         {
             AP_RemoveQueuedLocationScout(state, 0x3469420061705); // Human
             AP_RemoveQueuedLocationScout(state, 0x346942006172A); // Deku
