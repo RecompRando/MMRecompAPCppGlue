@@ -371,6 +371,16 @@ extern "C"
             AP_RemoveQueuedLocationScout(state, 0x3469420061704); // Zora
         }
 
+        if (AP_GetSlotDataInt(state, "shuffle_beaver_races") == 0)
+        {
+            AP_RemoveQueuedLocationScout(state, 0x346942009018D); // Beaver Race 1
+            AP_RemoveQueuedLocationScout(state, 0x346942007018D); // Beaver Race 2
+        }
+        else if (AP_GetSlotDataInt(state, "shuffle_beaver_races") == 1)
+        {
+            AP_RemoveQueuedLocationScout(state, 0x346942007018D); // Beaver Race 2
+        }
+
         if (AP_GetSlotDataInt(state, "shuffle_lottery") == 0) // Disabled
         {
             AP_RemoveQueuedLocationScout(state, 0x3469420080239);
