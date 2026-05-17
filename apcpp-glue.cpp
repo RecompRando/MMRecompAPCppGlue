@@ -370,6 +370,11 @@ extern "C"
             AP_RemoveQueuedLocationScout(state, 0x346942006172A); // Deku
             AP_RemoveQueuedLocationScout(state, 0x3469420061704); // Zora
         }
+
+        if (AP_GetSlotDataInt(state, "shuffle_lottery") == 0) // Disabled
+        {
+            AP_RemoveQueuedLocationScout(state, 0x3469420080239);
+        }
         
         
         if (AP_GetSlotDataInt(state, "intro_checks") == 0)
