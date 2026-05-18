@@ -350,11 +350,10 @@ extern "C"
         }
         else if (AP_GetSlotDataInt(state, "shuffle_minigames") == 1) // Single
         {
-            AP_RemoveQueuedLocationScout(state, 0x3469420000023); // Town 40-49
-            AP_RemoveQueuedLocationScout(state, 0x34694200800B5); // H&D Any Day
-            AP_RemoveQueuedLocationScout(state, 0x34694200801C9); // Playground Any Day
-            AP_RemoveQueuedLocationScout(state, 0x3469420000024); // Swamp 2120
-            AP_RemoveQueuedLocationScout(state, 0x3469420070292); // Fisherman Game
+            AP_RemoveQueuedLocationScout(state, 0x346942007011D); // Town 50
+            AP_RemoveQueuedLocationScout(state, 0x34694200700B5); // H&D Any Day
+            AP_RemoveQueuedLocationScout(state, 0x34694200701C9); // Playground All Days
+            AP_RemoveQueuedLocationScout(state, 0x346942008011D); // Swamp 2180
         }
 
         if (AP_GetSlotDataInt(state, "shuffle_treasure_chest_game") == 0) // Disabled
@@ -386,6 +385,19 @@ extern "C"
             AP_RemoveQueuedLocationScout(state, 0x3469420080239);
         }
         
+        if (AP_GetSlotDataInt(state, "shuffle_picture_rewards") == 0)
+        {
+            AP_RemoveQueuedLocationScout(state, 0x34694200701C5); // Tourist win
+            AP_RemoveQueuedLocationScout(state, 0x3469420071C54); // Tourist good
+            AP_RemoveQueuedLocationScout(state, 0x3469420071C52); // Tourist okay
+            AP_RemoveQueuedLocationScout(state, 0x3469420082284); // Lulu good
+            AP_RemoveQueuedLocationScout(state, 0x3469420082282); // Lulu bad
+        } else if (AP_GetSlotDataInt(state, "shuffle_picture_rewards") == 1) {
+            AP_RemoveQueuedLocationScout(state, 0x3469420071C54); // Tourist good
+            AP_RemoveQueuedLocationScout(state, 0x3469420071C52); // Tourist okay
+            AP_RemoveQueuedLocationScout(state, 0x3469420082284); // Lulu good
+            AP_RemoveQueuedLocationScout(state, 0x3469420082282); // Lulu bad
+        }
         
         if (AP_GetSlotDataInt(state, "intro_checks") == 0)
         {
