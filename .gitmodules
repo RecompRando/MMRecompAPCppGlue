@@ -1,7 +1,11 @@
 [submodule "lib/APCpp"]
 	path = lib/APCpp
-	url = https://github.com/RecompRando/APCpp.git
-	branch = main
+	# TEMPORARY: the macOS build needs the size_t->Json::Value fix that is
+	# still pending upstream (see PR referenced in the commit/PR description).
+	# Pointing at the fork so CI can build; revert to RecompRando/APCpp once
+	# the fix is merged.
+	url = https://github.com/MarcDufresne/APCpp.git
+	branch = macos-arm64-fix
 [submodule "Archipelago-MM"]
 	path = archipelago
 	url = https://github.com/RecompRando/Archipelago-MM

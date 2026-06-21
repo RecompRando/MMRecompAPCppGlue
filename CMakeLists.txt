@@ -6,7 +6,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_SKIP_BUILD_RPATH FALSE)
 set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-set(CMAKE_INSTALL_RPATH "$\{ORIGIN\}")
+if(APPLE)
+    # macOS dyld uses @loader_path (dir of the loading binary), not $ORIGIN.
+    set(CMAKE_INSTALL_RPATH "@loader_path")
+else()
+    set(CMAKE_INSTALL_RPATH "$\{ORIGIN\}")
+endif()
 
 # Include the script to download and set up the Python binary
 if(WIN32)
@@ -29,6 +34,8 @@ elseif(CMAKE_SYSTEM_NAME MATCHES "Linux")
     else()
         message(FATAL_ERROR "Unknown pointer size.")
     endif()
+elseif(CMAKE_SYSTEM_NAME MATCHES "Darwin")
+    include(${CMAKE_SOURCE_DIR}/PythonStandalone_macOS_arm64.cmake)
 endif()
 
 add_library(APCpp-Glue SHARED 
@@ -40,6 +47,14 @@ add_library(APCpp-Glue SHARED
 )
 
 target_include_directories(APCpp-Glue PRIVATE lib/APCpp)
+
+# The recomp engine resolves the native_libraries manifest entry by bare name
+# ("APCpp-Glue") + platform extension, matching the Windows APCpp-Glue.dll and
+# Linux APCpp-Glue.so in the release. macOS would otherwise get CMake's default
+# "lib" prefix (libAPCpp-Glue.dylib) and fail to resolve, so drop the prefix.
+if(APPLE)
+    set_target_properties(APCpp-Glue PROPERTIES PREFIX "")
+endif()
 
 if (WIN32)
     target_link_libraries(APCpp-Glue PRIVATE ws2_32)
