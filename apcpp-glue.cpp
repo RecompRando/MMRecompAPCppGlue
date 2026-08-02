@@ -370,6 +370,11 @@ extern "C"
             AP_RemoveQueuedLocationScout(state, 0x3469420061704); // Zora
         }
 
+        if (AP_GetSlotDataInt(state, "shuffle_zora_pot_game") == 0)
+        {
+            AP_RemoveQueuedLocationScout(state, 0x3469420072806); // Zora Cape Pot Game
+        }
+
         if (AP_GetSlotDataInt(state, "shuffle_beaver_races") == 0)
         {
             AP_RemoveQueuedLocationScout(state, 0x346942009018D); // Beaver Race 1
