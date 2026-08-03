@@ -268,6 +268,22 @@ extern "C"
                 AP_RemoveQueuedLocationScout(state, location_id);
             }
         }
+
+        if (AP_GetSlotDataInt(state, "shuffle_great_fairy_rewards") == 0)
+        {
+            for (int i = 0x00; i <= 0x04; ++i)
+            {
+                int64_t location_id = 0x3469420030000 | i;
+                AP_RemoveQueuedLocationScout(state, location_id);
+            }
+            AP_RemoveQueuedLocationScout(state, 0x3469420000086);
+        }
+
+        if (AP_GetSlotDataInt(state, "shuffle_spiderhouse_reward") == 0)
+        {
+            AP_RemoveQueuedLocationScout(state, 0x346942000008A);
+            AP_RemoveQueuedLocationScout(state, 0x3469420000009);
+        }
         
         for (int64_t i = AP_GetSlotDataInt(state, "starting_heart_locations"); i < 8; ++i)
         {
@@ -338,6 +354,74 @@ extern "C"
             AP_RemoveQueuedLocationScout(state, 0x346942007C404);
             AP_RemoveQueuedLocationScout(state, 0x346942007C405);
             AP_RemoveQueuedLocationScout(state, 0x346942007C407);
+        }
+
+        if (AP_GetSlotDataInt(state, "shuffle_minigames") == 0) // Disabled
+        {
+            AP_RemoveQueuedLocationScout(state, 0x3469420000023); // Town 40-49
+            AP_RemoveQueuedLocationScout(state, 0x346942007011D); // Town 50
+            AP_RemoveQueuedLocationScout(state, 0x34694200800B5); // H&D Any Day
+            AP_RemoveQueuedLocationScout(state, 0x34694200700B5); // H&D All Days
+            AP_RemoveQueuedLocationScout(state, 0x34694200801C9); // Playground Any Day
+            AP_RemoveQueuedLocationScout(state, 0x34694200701C9); // Playground All Days
+            AP_RemoveQueuedLocationScout(state, 0x3469420000024); // Swamp 2120
+            AP_RemoveQueuedLocationScout(state, 0x346942008011D); // Swamp 2180
+            AP_RemoveQueuedLocationScout(state, 0x3469420070292); // Fisherman Game
+        }
+        else if (AP_GetSlotDataInt(state, "shuffle_minigames") == 1) // Single
+        {
+            AP_RemoveQueuedLocationScout(state, 0x346942007011D); // Town 50
+            AP_RemoveQueuedLocationScout(state, 0x34694200700B5); // H&D Any Day
+            AP_RemoveQueuedLocationScout(state, 0x34694200701C9); // Playground All Days
+            AP_RemoveQueuedLocationScout(state, 0x346942008011D); // Swamp 2180
+        }
+
+        if (AP_GetSlotDataInt(state, "shuffle_treasure_chest_game") == 0) // Disabled
+        {
+            AP_RemoveQueuedLocationScout(state, 0x3469420061705); // Human
+            AP_RemoveQueuedLocationScout(state, 0x346942006172A); // Deku
+            AP_RemoveQueuedLocationScout(state, 0x346942006170C); // Goron
+            AP_RemoveQueuedLocationScout(state, 0x3469420061704); // Zora
+        }
+        else if (AP_GetSlotDataInt(state, "shuffle_treasure_chest_game") == 1) // Goron Only
+        {
+            AP_RemoveQueuedLocationScout(state, 0x3469420061705); // Human
+            AP_RemoveQueuedLocationScout(state, 0x346942006172A); // Deku
+            AP_RemoveQueuedLocationScout(state, 0x3469420061704); // Zora
+        }
+
+        if (AP_GetSlotDataInt(state, "shuffle_zora_pot_game") == 0)
+        {
+            AP_RemoveQueuedLocationScout(state, 0x3469420072806); // Zora Cape Pot Game
+        }
+
+        if (AP_GetSlotDataInt(state, "shuffle_beaver_races") == 0)
+        {
+            AP_RemoveQueuedLocationScout(state, 0x346942009018D); // Beaver Race 1
+            AP_RemoveQueuedLocationScout(state, 0x346942007018D); // Beaver Race 2
+        }
+        else if (AP_GetSlotDataInt(state, "shuffle_beaver_races") == 1)
+        {
+            AP_RemoveQueuedLocationScout(state, 0x346942007018D); // Beaver Race 2
+        }
+
+        if (AP_GetSlotDataInt(state, "shuffle_lottery") == 0) // Disabled
+        {
+            AP_RemoveQueuedLocationScout(state, 0x3469420080239);
+        }
+        
+        if (AP_GetSlotDataInt(state, "shuffle_picture_rewards") == 0)
+        {
+            AP_RemoveQueuedLocationScout(state, 0x34694200701C5); // Tourist win
+            AP_RemoveQueuedLocationScout(state, 0x3469420071C54); // Tourist good
+            AP_RemoveQueuedLocationScout(state, 0x3469420071C52); // Tourist okay
+            AP_RemoveQueuedLocationScout(state, 0x3469420082284); // Lulu good
+            AP_RemoveQueuedLocationScout(state, 0x3469420082282); // Lulu bad
+        } else if (AP_GetSlotDataInt(state, "shuffle_picture_rewards") == 1) {
+            AP_RemoveQueuedLocationScout(state, 0x3469420071C54); // Tourist good
+            AP_RemoveQueuedLocationScout(state, 0x3469420071C52); // Tourist okay
+            AP_RemoveQueuedLocationScout(state, 0x3469420082284); // Lulu good
+            AP_RemoveQueuedLocationScout(state, 0x3469420082282); // Lulu bad
         }
         
         if (AP_GetSlotDataInt(state, "intro_checks") == 0)
